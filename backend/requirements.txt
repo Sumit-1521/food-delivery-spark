@@ -1,0 +1,16 @@
+pyspark
+fastapi
+uvicorn
+pandas
+scikit-learn
+numpy
+joblib
+python-multipart
+requests
+pytest
+pytest-asyncio
+fastapi
+uvicorn
+scikit-learn
+pandas
+joblib

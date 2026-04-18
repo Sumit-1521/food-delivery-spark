@@ -1,0 +1,13 @@
+import axios from 'axios';
+
+const API_URL = 'http://localhost:8000/predict';
+
+export const predictDeliveryTime = async (inputData) => {
+    try {
+        const response = await axios.post(API_URL, inputData);
+        return response.data;
+    } catch (error) {
+        console.error('Error making prediction:', error);
+        throw error;
+    }
+};
