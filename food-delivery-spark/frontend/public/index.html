@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Delivery Time Predictor 🚀</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        /* Floating food icons background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .food-icon {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.1;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100vh) rotate(360deg); }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #7b2ff7;
+            box-shadow: 0 0 20px rgba(123, 47, 247, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23fff' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+            background-size: 20px;
+        }
+
+        .form-group select option {
+            background: #1a1a2e;
+            color: #fff;
+        }
+
+        .btn-predict {
+            width: 100%;
+            padding: 18px;
+            margin-top: 25px;
+            background: linear-gradient(135deg, #7b2ff7 0%, #00d4ff 100%);
+            border: none;
+            border-radius: 15px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(123, 47, 247, 0.4);
+        }
+
+        .btn-predict:active {
+            transform: translateY(0);
+        }
+
+        .btn-predict::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-predict:hover::before {
+            left: 100%;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(123, 47, 247, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(123, 47, 247, 0.3);
+            text-align: center;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+        }
+
+        .result.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .result h3 {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .result .time {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s infinite;
+        }
+
+        .result .unit {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .loading {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #7b2ff7;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 10px;
+        }
+
+        /* Delivery animation */
+        .delivery-truck {
+            font-size: 4rem;
+            animation: drive 2s ease-in-out infinite;
+            display: inline-block;
+        }
+
+        @keyframes drive {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 25px;
+            }
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Animation -->
+    <div class="bg-animation">
+        <span class="food-icon" style="left: 10%; animation-delay: 0s;">🍕</span>
+        <span class="food-icon" style="left: 20%; animation-delay: 2s;">🍔</span>
+        <span class="food-icon" style="left: 30%; animation-delay: 4s;">🍟</span>
+        <span class="food-icon" style="left: 40%; animation-delay: 6s;">🌮</span>
+        <span class="food-icon" style="left: 50%; animation-delay: 8s;">🍣</span>
+        <span class="food-icon" style="left: 60%; animation-delay: 10s;">🍜</span>
+        <span class="food-icon" style="left: 70%; animation-delay: 12s;">🍩</span>
+        <span class="food-icon" style="left: 80%; animation-delay: 14s;">🍦</span>
+        <span class="food-icon" style="left: 90%; animation-delay: 16s;">🥡</span>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🍔 Delivery Time Predictor</h1>
+            <p>AI-powered delivery time estimation</p>
+        </div>
+
+        <form id="predictionForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>📍 Distance (km)</label>
+                    <input type="number" step="0.1" id="Distance_km" placeholder="5.0" required>
+                </div>
+
+                <div class="form-group">
+                    <label>⏱️ Preparation Time (min)</label>
+                    <input type="number" id="Preparation_Time_min" placeholder="15" required>
+                </div>
+
+                <div class="form-group">
+                    <label>👨‍💼 Courier Experience (yrs)</label>
+                    <input type="number" step="0.5" id="Courier_Experience_yrs" placeholder="2" required>
+                </div>
+
+                <div class="form-group">
+                    <label>🌤️ Weather</label>
+                    <select id="Weather" required>
+                        <option value="">Select Weather</option>
+                        <option value="Clear">☀️ Clear</option>
+                        <option value="Cloudy">☁️ Cloudy</option>
+                        <option value="Rainy">🌧️ Rainy</option>
+                        <option value="Snowy">❄️ Snowy</option>
+                        <option value="Foggy">🌫️ Foggy</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>🚗 Traffic Level</label>
+                    <select id="Traffic_Level" required>
+                        <option value="">Select Traffic</option>
+                        <option value="Low">🟢 Low</option>
+                        <option value="Medium">🟡 Medium</option>
+                        <option value="High">🔴 High</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>🕐 Time of Day</label>
+                    <select id="Time_of_Day" required>
+                        <option value="">Select Time</option>
+                        <option value="Breakfast">🌅 Breakfast</option>
+                        <option value="Lunch">☀️ Lunch</option>
+                        <option value="Dinner">🌆 Dinner</option>
+                        <option value="Late_Night">🌙 Late Night</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>🏍️ Vehicle Type</label>
+                    <select id="Vehicle_Type" required>
+                        <option value="">Select Vehicle</option>
+                        <option value="Bike">🚲 Bike</option>
+                        <option value="Car">🚗 Car</option>
+                        <option value="Scooter">🛵 Scooter</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-predict">
+                🚀 Predict Delivery Time
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="delivery-truck">🚚</div>
+            <p>Calculating best route...</p>
+        </div>
+
+        <div class="result" id="result">
+            <h3>Estimated Delivery Time</h3>
+            <div class="time" id="predictionTime">--</div>
+            <div class="unit">minutes</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000/predict';
+
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                Distance_km: parseFloat(document.getElementById('Distance_km').value),
+                Weather: document.getElementById('Weather').value,
+                Traffic_Level: document.getElementById('Traffic_Level').value,
+                Time_of_Day: document.getElementById('Time_of_Day').value,
+                Vehicle_Type: document.getElementById('Vehicle_Type').value,
+                Preparation_Time_min: parseFloat(document.getElementById('Preparation_Time_min').value),
+                Courier_Experience_yrs: parseFloat(document.getElementById('Courier_Experience_yrs').value)
+            };
+
+            // Show loading
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('result').classList.remove('show');
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Prediction failed');
+                }
+
+                const data = await response.json();
+                
+                // Animate number counting
+                const targetTime = data.predicted_delivery_time;
+                const timeElement = document.getElementById('predictionTime');
+                let currentTime = 0;
+                const duration = 1000;
+                const increment = targetTime / (duration / 16);
+
+                const counter = setInterval(() => {
+                    currentTime += increment;
+                    if (currentTime >= targetTime) {
+                        currentTime = targetTime;
+                        clearInterval(counter);
+                    }
+                    timeElement.textContent = currentTime.toFixed(1);
+                }, 16);
+
+                // Show result
+                setTimeout(() => {
+                    document.getElementById('loading').classList.remove('show');
+                    document.getElementById('result').classList.add('show');
+                }, 500);
+
+            } catch (error) {
+                alert('Error: ' + error.message + '\nMake sure the backend is running on port 8000!');
+                document.getElementById('loading').classList.remove('show');
+            }
+        });
+    </script>
+</body>
+</html>
